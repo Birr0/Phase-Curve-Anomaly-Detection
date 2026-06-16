@@ -20,13 +20,18 @@ r = requests.post(
     "output-format": "parquet"
   }
 )
+# 1. ADD THIS: Catch API errors immediately
+if r.status_code != 200:
+    raise RuntimeError(f"API Request failed! Status: {r.status_code}\nMessage: {r.text}")
 
+print("Writing to parquet file...")
 with open("pc_params.parquet", "wb") as f:
     f.write(r.content)
 
 data_files = {
     "full" : f"./*.parquet",
 }
+
 ds_dict = load_dataset("parquet", data_files=data_files)
 ds_dict.push_to_hub(
     f"{HF_USERNAME}/sHG1G2_params",
